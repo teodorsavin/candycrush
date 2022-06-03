@@ -1,2 +1,2 @@
 # candycrush
-![Example of the game](example.gif)
+![Example of the game](example1.gif)
