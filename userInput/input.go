@@ -13,31 +13,41 @@ import (
 
 func WaitForUserInput() (int, int, int, int, error) {
 	fmt.Print("Coordinates of the element that you want to move (i.e. C1): ")
-	inputCoordinates := bufio.NewScanner(os.Stdin)
-	inputCoordinates.Scan()
-	oldCoordinates := inputCoordinates.Text()
-	if len(oldCoordinates) != 2 {
-		return -1, -1, -1, -1, errors.New("invalid input")
+	oldCol, oldRow, err := readCoordinates(os.Stdin)
+	if err != nil {
+		return -1, -1, -1, -1, errors.New("invalid input for current position")
 	}
 
-	oldCol, oldRow := extractCoordinates(oldCoordinates)
 	fmt.Print("Where do you want to move it (i.e. D1): ")
-
-	inputNewCoordinates := bufio.NewScanner(os.Stdin)
-	inputNewCoordinates.Scan()
-	newCoordinates := inputNewCoordinates.Text()
-	if len(newCoordinates) != 2 {
-		fmt.Println("I said coordinates, not what you ate last night.")
-		return -1, -1, -1, -1, errors.New("invalid input")
+	newCol, newRow, err := readCoordinates(os.Stdin)
+	if err != nil {
+		return -1, -1, -1, -1, errors.New("invalid input for new position")
 	}
 
-	newCol, newRow := extractCoordinates(newCoordinates)
 	if newCol != oldCol && newRow != oldRow {
 		fmt.Println("invalid move.", "you can move it to an adjacent place vertically or horizontally")
 		return -1, -1, -1, -1, errors.New("invalid move")
 	}
 
+	if abs(newCol - oldCol) > 1 || abs(newRow - oldRow) > 1 {
+		fmt.Println("invalid move.", "you can move it to an adjacent place vertically or horizontally")
+		return -1, -1, -1, -1, errors.New("invalid move")
+	}
+
 	return oldCol, oldRow, newCol, newRow, nil
+}
+
+func readCoordinates(in *os.File) (int, int, error) {
+	inputCoordinates := bufio.NewScanner(in)
+	inputCoordinates.Scan()
+	coordinates := inputCoordinates.Text()
+	if len(coordinates) != 2 {
+		return -1, -1, errors.New("invalid input")
+	}
+
+	col, row := extractCoordinates(coordinates)
+
+	return col, row, nil
 }
 
 func extractCoordinates(input string) (int, int) {
@@ -51,4 +61,12 @@ func extractCoordinates(input string) (int, int) {
 		}
 	}
 	return -1, -1
+}
+
+// Abs returns the absolute value of x.
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
